@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <title>hello-wasm example</title>
+  </head>
+  <body>
+    <input type="number" id="pId" />
+    <select id="event">
+      <option value="d">Discard</option>
+      <option value="n">NoCard</option>
+      <option value="w">Draw</option>
+    </select>
+    <select id="cardCol">
+      <option value="0">Red</option>
+      <option value="1">Blue</option>
+      <option value="2">Green</option>
+      <option value="3">Yellow</option>
+    </select>
+    <input type="number" id="cardNum" />
+    <button id="ret">Submit</button>
+    <p>
+      <div id="out"></div>
+    </p>
+    <p>
+      <div id="st"></div>
+    </p>
+    <script type="module">
+      import init, { greet, UnoGameState, CardType } from "./pkg/fsm.js";
+      var ut;
+      init().then(() => {
+        ut = UnoGameState.new();
+        document.getElementById("ret").addEventListener('click', e => {
+          let eve = document.getElementById("event").value;
+          var y;
+          if (eve == "d") {
+            y = ut.discard(document.getElementById("pId").value, document.getElementById("cardCol").value, document.getElementById("cardNum").value)
+          } else if (eve == "n") {
+            y = ut.no_card(document.getElementById("pId").value);
+          } else if (eve == "w") {
+            y = ut.draw(document.getElementById("pId").value);
+          }
+          var tt = ut.output();
+          console.log(tt);
+          document.getElementById("out").textContent = "Output = " + y;
+          document.getElementById("st").textContent = "Current State = " + tt;
+        });
+      });
+      
+    </script>
+  </body>
+</html>

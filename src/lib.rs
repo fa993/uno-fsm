@@ -1,4 +1,8 @@
+use core::fmt;
+use std::{fmt::Debug, fmt::Write, panic};
+
 use rand::Rng;
+use wasm_bindgen::prelude::*;
 
 pub trait State {
     type Input;
@@ -29,12 +33,14 @@ pub trait State {
 //a player id type, here usize for demo
 type PlayerId = usize;
 
+#[wasm_bindgen]
+#[repr(u8)]
 #[derive(Debug, PartialEq, Clone, Copy)]
-enum CardType {
-    Red,
-    Blue,
-    Green,
-    Yellow,
+pub enum CardType {
+    Red = 0,
+    Blue = 1,
+    Green = 2,
+    Yellow = 3,
     // if one wants to implement special cards such as draw 4s and wild,
     // one would put it here
 }
@@ -43,15 +49,16 @@ enum CardType {
 //and the number,
 //if you want to include reverse, skip, etc
 //you would need to represent another enum for the number
+#[wasm_bindgen]
 #[derive(Debug, PartialEq, Clone)]
-struct UnoCard {
+pub struct UnoCard {
     card_type: CardType,
     number: usize,
 }
 
 //every uno event has an associated player id, i.e the player who sent that event
 //the event also has an event type
-struct UnoEvent {
+pub struct UnoEvent {
     id: PlayerId,
     event_type: UnoEventType,
 }
@@ -59,7 +66,7 @@ struct UnoEvent {
 //the event type which describes what sort of event it is
 //the input type for this state
 #[derive(PartialEq)]
-enum UnoEventType {
+pub enum UnoEventType {
     //the discard event also has a card as a value, indicating the card to be discarded
     Discard(UnoCard),
     //event sent when user has no available card to withdraw,
@@ -71,7 +78,8 @@ enum UnoEventType {
 
 //the error type for this state
 #[derive(Debug, Clone, Copy)]
-enum UnoError {
+#[repr(u8)]
+pub enum UnoError {
     //used when the discarded card is not of the same colour or the same number
     IncorrectCard,
     //used when the expected player did not send the event
@@ -79,22 +87,25 @@ enum UnoError {
     UnexpectedEvent,
 }
 
+#[wasm_bindgen]
+#[repr(u8)]
 #[derive(Debug, PartialEq, Eq)]
-enum UnoStateType {
-    WaitingForDiscard,
-    WaitingForDraw,
+pub enum UnoStateType {
+    WaitingForDiscard = 0,
+    WaitingForDraw = 1,
 }
 
 //the output type
 #[derive(Debug)]
-enum UnoOutput {
+pub enum UnoOutput {
     //sent after a draw event with the drawn card
     Card(UnoCard),
 }
 
 //the state type
+#[wasm_bindgen]
 #[derive(Debug)]
-struct UnoGameState {
+pub struct UnoGameState {
     //other fields to indicate deck size, maybe shuffled deck or card order
     //basically other metadata fields
     players_num: usize,
@@ -163,81 +174,151 @@ impl State for UnoGameState {
     }
 }
 
-fn main() {
-    let mut state = UnoGameState {
-        players_num: 4,
-        top_card: UnoCard {
-            card_type: CardType::Red,
-            number: 4,
-        },
-        state_type: UnoStateType::WaitingForDiscard,
-        expected_player_turn: 0,
-    };
-
-    println!("{:?}", state);
-    state
-        .next(&UnoEvent {
-            id: 0,
-            event_type: UnoEventType::Discard(UnoCard {
+#[wasm_bindgen]
+impl UnoGameState {
+    pub fn new() -> UnoGameState {
+        UnoGameState {
+            players_num: 4,
+            top_card: UnoCard {
                 card_type: CardType::Blue,
-                number: 4,
-            }),
-        })
-        .expect("Error");
-
-    println!("{:?}", state);
-
-    state
-        .next(&UnoEvent {
-            id: 1,
-            event_type: UnoEventType::NoCard,
-        })
-        .expect("Error");
-
-    println!("{:?}", state);
-
-    let err = state
-        .next(&UnoEvent {
-            id: 1,
-            event_type: UnoEventType::NoCard,
-        })
-        .expect_err("No Error");
-
-    println!("{:?}", err);
-
-    let out = state
-        .next(&UnoEvent {
-            id: 1,
-            event_type: UnoEventType::Draw,
-        })
-        .expect("Error")
-        .expect("No O/P");
-    println!("{:?}", out);
-
-    println!("{:?}", state);
-
-    let err = state
-        .next(&UnoEvent {
-            id: 3,
-            event_type: UnoEventType::Draw,
-        })
-        .expect_err("No Error");
-
-    println!("{:?}", err);
-
-    println!("{:?}", state);
-
-    let err = state
-        .next(&UnoEvent {
-            id: 1,
-            event_type: UnoEventType::Discard(UnoCard {
-                card_type: CardType::Green,
                 number: 5,
+            },
+            state_type: UnoStateType::WaitingForDiscard,
+            expected_player_turn: 0,
+        }
+    }
+
+    pub fn draw(&mut self, id: u32) -> String {
+        let mut r = String::new();
+        let ret = self.next(&UnoEvent {
+            id: id.try_into().expect("Value not fit"),
+            event_type: UnoEventType::Draw
+        });
+        write!(r, "{:?}", ret).expect("Failed to write O/P");
+        r
+    }
+
+    pub fn no_card(&mut self, id: u32,) -> String {
+        let mut r = String::new();
+        let ret = self.next(&UnoEvent {
+            id: id.try_into().expect("Value not fit"),
+            event_type: UnoEventType::NoCard
+        });
+        write!(r, "{:?}", ret).expect("Failed to write O/P");
+        r
+    } 
+
+    pub fn discard(&mut self, id: u32, color: CardType, num: u32) -> String {
+        let mut r = String::new();
+        let ret = self.next(&UnoEvent {
+            id: id.try_into().expect("Value not fit"),
+            event_type: UnoEventType::Discard(UnoCard {
+                card_type: color,
+                number: num.try_into().expect("Value not fit"),
             }),
-        })
-        .expect_err("No Error");
+        });
+        write!(r, "{:?}", ret).expect("Failed to write O/P");
+        r
+    }
 
-    println!("{:?}", err);
+    pub fn output(&self) -> String {
+        self.to_string()
+    }
 
-    println!("{:?}", state);
+}
+
+impl fmt::Display for UnoGameState {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
+// fn main() {
+//     let mut state = UnoGameState {
+//         players_num: 4,
+//         top_card: UnoCard {
+//             card_type: CardType::Red,
+//             number: 4,
+//         },
+//         state_type: UnoStateType::WaitingForDiscard,
+//         expected_player_turn: 0,
+//     };
+
+//     println!("{:?}", state);
+//     state
+//         .next(&UnoEvent {
+//             id: 0,
+//             event_type: UnoEventType::Discard(UnoCard {
+//                 card_type: CardType::Blue,
+//                 number: 4,
+//             }),
+//         })
+//         .expect("Error");
+
+//     println!("{:?}", state);
+
+//     state
+//         .next(&UnoEvent {
+//             id: 1,
+//             event_type: UnoEventType::NoCard,
+//         })
+//         .expect("Error");
+
+//     println!("{:?}", state);
+
+//     let err = state
+//         .next(&UnoEvent {
+//             id: 1,
+//             event_type: UnoEventType::NoCard,
+//         })
+//         .expect_err("No Error");
+
+//     println!("{:?}", err);
+
+//     let out = state
+//         .next(&UnoEvent {
+//             id: 1,
+//             event_type: UnoEventType::Draw,
+//         })
+//         .expect("Error")
+//         .expect("No O/P");
+//     println!("{:?}", out);
+
+//     println!("{:?}", state);
+
+//     let err = state
+//         .next(&UnoEvent {
+//             id: 3,
+//             event_type: UnoEventType::Draw,
+//         })
+//         .expect_err("No Error");
+
+//     println!("{:?}", err);
+
+//     println!("{:?}", state);
+
+//     let err = state
+//         .next(&UnoEvent {
+//             id: 1,
+//             event_type: UnoEventType::Discard(UnoCard {
+//                 card_type: CardType::Green,
+//                 number: 5,
+//             }),
+//         })
+//         .expect_err("No Error");
+
+//     println!("{:?}", err);
+
+//     println!("{:?}", state);
+// }
+
+#[wasm_bindgen]
+extern "C" {
+    pub fn alert(s: &str);
+}
+
+#[wasm_bindgen]
+pub fn greet(name: &str) {
+    panic::set_hook(Box::new(console_error_panic_hook::hook));
+    alert(&format!("Hello, {}!", name));
 }
