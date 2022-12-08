@@ -1,0 +1,12 @@
+{
+  "name": "fsm",
+  "version": "0.1.0",
+  "files": [
+    "fsm_bg.wasm",
+    "fsm.js",
+    "fsm.d.ts"
+  ],
+  "module": "fsm.js",
+  "types": "fsm.d.ts",
+  "sideEffects": false
+}
