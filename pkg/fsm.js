@@ -171,10 +171,10 @@ export class UnoGameState {
     /**
     * @returns {string}
     */
-    current() {
+    current_state() {
         try {
             const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.unogamestate_current(retptr, this.ptr);
+            wasm.unogamestate_current_state(retptr, this.ptr);
             var r0 = getInt32Memory0()[retptr / 4 + 0];
             var r1 = getInt32Memory0()[retptr / 4 + 1];
             return getStringFromWasm0(r0, r1);

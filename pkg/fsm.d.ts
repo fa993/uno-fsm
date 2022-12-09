@@ -47,7 +47,7 @@ export class UnoGameState {
 /**
 * @returns {string}
 */
-  current(): string;
+  current_state(): string;
 }
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
@@ -60,7 +60,7 @@ export interface InitOutput {
   readonly unogamestate_draw: (a: number, b: number, c: number) => void;
   readonly unogamestate_no_card: (a: number, b: number, c: number) => void;
   readonly unogamestate_discard: (a: number, b: number, c: number, d: number, e: number) => void;
-  readonly unogamestate_current: (a: number, b: number) => void;
+  readonly unogamestate_current_state: (a: number, b: number) => void;
   readonly __wbindgen_add_to_stack_pointer: (a: number) => number;
   readonly __wbindgen_free: (a: number, b: number) => void;
   readonly __wbindgen_exn_store: (a: number) => void;

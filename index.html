@@ -30,7 +30,7 @@
       var ut;
       init().then(() => {
         ut = UnoGameState.new();
-        document.getElementById("st").textContent = "Current State = " + ut.current();
+        document.getElementById("st").textContent = "Current State = " + ut.current_state();
         document.getElementById("ret").addEventListener('click', e => {
           let eve = document.getElementById("event").value;
           var y;
@@ -41,7 +41,7 @@
           } else if (eve == "w") {
             y = ut.draw(document.getElementById("pId").value);
           }
-          var tt = ut.current();
+          var tt = ut.current_state();
           console.log(tt);
           document.getElementById("out").textContent = "Output = " + y;
           document.getElementById("st").textContent = "Current State = " + tt;

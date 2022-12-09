@@ -221,7 +221,7 @@ impl UnoGameState {
         r
     }
 
-    pub fn current(&self) -> String {
+    pub fn current_state(&self) -> String {
         self.to_string()
     }
 
