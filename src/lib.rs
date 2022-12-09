@@ -221,7 +221,7 @@ impl UnoGameState {
         r
     }
 
-    pub fn output(&self) -> String {
+    pub fn current(&self) -> String {
         self.to_string()
     }
 
@@ -231,94 +231,4 @@ impl fmt::Display for UnoGameState {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:?}", self)
     }
-}
-
-// fn main() {
-//     let mut state = UnoGameState {
-//         players_num: 4,
-//         top_card: UnoCard {
-//             card_type: CardType::Red,
-//             number: 4,
-//         },
-//         state_type: UnoStateType::WaitingForDiscard,
-//         expected_player_turn: 0,
-//     };
-
-//     println!("{:?}", state);
-//     state
-//         .next(&UnoEvent {
-//             id: 0,
-//             event_type: UnoEventType::Discard(UnoCard {
-//                 card_type: CardType::Blue,
-//                 number: 4,
-//             }),
-//         })
-//         .expect("Error");
-
-//     println!("{:?}", state);
-
-//     state
-//         .next(&UnoEvent {
-//             id: 1,
-//             event_type: UnoEventType::NoCard,
-//         })
-//         .expect("Error");
-
-//     println!("{:?}", state);
-
-//     let err = state
-//         .next(&UnoEvent {
-//             id: 1,
-//             event_type: UnoEventType::NoCard,
-//         })
-//         .expect_err("No Error");
-
-//     println!("{:?}", err);
-
-//     let out = state
-//         .next(&UnoEvent {
-//             id: 1,
-//             event_type: UnoEventType::Draw,
-//         })
-//         .expect("Error")
-//         .expect("No O/P");
-//     println!("{:?}", out);
-
-//     println!("{:?}", state);
-
-//     let err = state
-//         .next(&UnoEvent {
-//             id: 3,
-//             event_type: UnoEventType::Draw,
-//         })
-//         .expect_err("No Error");
-
-//     println!("{:?}", err);
-
-//     println!("{:?}", state);
-
-//     let err = state
-//         .next(&UnoEvent {
-//             id: 1,
-//             event_type: UnoEventType::Discard(UnoCard {
-//                 card_type: CardType::Green,
-//                 number: 5,
-//             }),
-//         })
-//         .expect_err("No Error");
-
-//     println!("{:?}", err);
-
-//     println!("{:?}", state);
-// }
-
-#[wasm_bindgen]
-extern "C" {
-    pub fn alert(s: &str);
-}
-
-#[wasm_bindgen]
-pub fn greet(name: &str) {
-    panic::set_hook(Box::new(console_error_panic_hook::hook));
-    alert(&format!("Hello, {}!", name));
 }

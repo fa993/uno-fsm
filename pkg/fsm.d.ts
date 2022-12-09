@@ -1,10 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
-* @param {string} name
-*/
-export function greet(name: string): void;
-/**
 */
 export enum CardType {
   Red,
@@ -51,7 +47,7 @@ export class UnoGameState {
 /**
 * @returns {string}
 */
-  output(): string;
+  current(): string;
 }
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
@@ -64,12 +60,9 @@ export interface InitOutput {
   readonly unogamestate_draw: (a: number, b: number, c: number) => void;
   readonly unogamestate_no_card: (a: number, b: number, c: number) => void;
   readonly unogamestate_discard: (a: number, b: number, c: number, d: number, e: number) => void;
-  readonly unogamestate_output: (a: number, b: number) => void;
-  readonly greet: (a: number, b: number) => void;
+  readonly unogamestate_current: (a: number, b: number) => void;
   readonly __wbindgen_add_to_stack_pointer: (a: number) => number;
   readonly __wbindgen_free: (a: number, b: number) => void;
-  readonly __wbindgen_malloc: (a: number) => number;
-  readonly __wbindgen_realloc: (a: number, b: number, c: number) => number;
   readonly __wbindgen_exn_store: (a: number) => void;
 }
 
