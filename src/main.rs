@@ -5,7 +5,7 @@ pub trait State {
     type Output;
     type Error;
 
-    fn validate(&self, input: &Self::Input) -> Option<Self::Error>;
+    fn validate(&self, input: &Self::Input) -> Result<(), Self::Error>;
 
     fn compute(&self, input: &Self::Input) -> Option<Self::Output>;
 
@@ -15,14 +15,10 @@ pub trait State {
         &mut self,
         transition_event: &Self::Input,
     ) -> Result<Option<Self::Output>, Self::Error> {
-        let res = self.validate(transition_event);
-        if let Some(x) = res {
-            Err(x)
-        } else {
-            let out = self.compute(transition_event);
-            self.transition(transition_event);
-            Ok(out)
-        }
+        self.validate(transition_event)?;
+        let out = self.compute(transition_event);
+        self.transition(transition_event);
+        Ok(out)
     }
 }
 
@@ -110,21 +106,21 @@ impl State for UnoGameState {
     type Output = UnoOutput;
     type Error = UnoError;
 
-    fn validate(&self, t: &Self::Input) -> Option<UnoError> {
+    fn validate(&self, t: &Self::Input) -> Result<(), UnoError> {
         if self.expected_player_turn != t.id {
-            return Some(UnoError::IncorrectPlayer);
+            return Err(UnoError::IncorrectPlayer);
         }
         match (&self.state_type, &t.event_type) {
             (UnoStateType::WaitingForDiscard, UnoEventType::Discard(c)) => {
                 if self.top_card.card_type == c.card_type || self.top_card.number == c.number {
-                    None
+                    Ok(())
                 } else {
-                    Some(UnoError::IncorrectCard)
+                    Err(UnoError::IncorrectCard)
                 }
             }
-            (UnoStateType::WaitingForDiscard, UnoEventType::NoCard) => None,
-            (UnoStateType::WaitingForDraw, UnoEventType::Draw) => None,
-            _ => Some(UnoError::UnexpectedEvent),
+            (UnoStateType::WaitingForDiscard, UnoEventType::NoCard) => Ok(()),
+            (UnoStateType::WaitingForDraw, UnoEventType::Draw) => Ok(()),
+            _ => Err(UnoError::UnexpectedEvent),
         }
     }
 
